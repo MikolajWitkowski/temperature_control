@@ -15,14 +15,26 @@ lcd_db4 = 13
 lcd_db5 = 6
 lcd_db6 = 5
 lcd_db7 = 11
+lcd_delay = 0.005
+info_refresh = 10
 
+def main():
+    lcd()
+    while True:
+        lcd_reset()        
+        read_temp_cpu()
+        read_temp()
+        lcd_info("temp: "+read_temp()+chr(176)+"C"+
+                " \nCPU: "+read_temp_cpu()+chr(176)+"C")
+        time.sleep(info_refresh)
+        
 
 def read_temp_cpu():
     f = open(path_temp_cpu, 'r')
     line = f.readlines()
     f.close()
     temp_cpu = line[0][:2]
-    return temp_cpu
+    return str(temp_cpu)
 
 
 def read_temp_raw():
@@ -37,7 +49,7 @@ def read_temp():
     if re.match(r'(.*) YES(.*)', lines):
         temp = re.search(r'(.*) t=(.*)', lines).group(2)[:-4]
         temp_c = round((float(temp) / 1000), 1)
-    return temp_c
+    return str(temp_c)
 
 
 def lcd():
@@ -59,15 +71,15 @@ def lcd_reset():
     lcd_byte(0x06)
     lcd_byte(0x01)
     lcd_byte(0x0C)
-    time.sleep(0.001)
+    time.sleep(lcd_delay)
 
 
 def lcd_byte(bits, mode=False):
     GPIO.output(lcd_rs, mode)
-    GPIO.output(lcd_db4, mode)
-    GPIO.output(lcd_db5, mode)
-    GPIO.output(lcd_db6, mode)
-    GPIO.output(lcd_db7, mode)
+    GPIO.output(lcd_db4, False)
+    GPIO.output(lcd_db5, False)
+    GPIO.output(lcd_db6, False)
+    GPIO.output(lcd_db7, False)
 
     if bits & 0x10 == 0x10:
         GPIO.output(lcd_db4, True)
@@ -81,8 +93,12 @@ def lcd_byte(bits, mode=False):
     if bits & 0x80 == 0x80:
         GPIO.output(lcd_db7, True)
 
-    GPIO.output(lcd_e, True)
-    GPIO.output(lcd_e, False)
+    lcd_refresh()
+            
+    GPIO.output(lcd_db4, False)
+    GPIO.output(lcd_db5, False)
+    GPIO.output(lcd_db6, False)
+    GPIO.output(lcd_db7, False)
 
     if bits & 0x01 == 0x01:
         GPIO.output(lcd_db4, True)
@@ -95,10 +111,16 @@ def lcd_byte(bits, mode=False):
 
     if bits & 0x08 == 0x08:
         GPIO.output(lcd_db7, True)
-
+    
+    lcd_refresh()
+   
+def lcd_refresh():
+    time.sleep(lcd_delay)
     GPIO.output(lcd_e, True)
+    time.sleep(lcd_delay)
     GPIO.output(lcd_e, False)
-
+    time.sleep(lcd_delay)
+    
 
 def lcd_info(text):
     for char in text:
@@ -109,8 +131,9 @@ def lcd_info(text):
 
 
 if __name__ == "__main__":
-    read_temp()
-    read_temp_cpu()
-    lcd()
-    lcd_info("hello")
+    try:
+        main()
+    except KeyboardInterrupt:
+        lcd_reset()
+        GPIO.cleanup()
 
