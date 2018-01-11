@@ -17,15 +17,34 @@ lcd_db6 = 5
 lcd_db7 = 11
 lcd_delay = 0.005
 info_refresh = 10
+fun = 2
+
 
 def main():
-    lcd()
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(lcd_rs, GPIO.OUT)
+    GPIO.setup(lcd_e, GPIO.OUT)
+    GPIO.setup(lcd_db4, GPIO.OUT)
+    GPIO.setup(lcd_db5, GPIO.OUT)
+    GPIO.setup(lcd_db6, GPIO.OUT)
+    GPIO.setup(lcd_db7, GPIO.OUT)
+    GPIO.setup(fun, GPIO.OUT)
+
+    lcd_reset()
     while True:
-        lcd_reset()        
-        read_temp_cpu()
-        read_temp()
-        lcd_info("temp: "+read_temp()+chr(176)+"C"+
-                " \nCPU: "+read_temp_cpu()+chr(176)+"C")
+        lcd_reset()
+        new_temp_cpu = read_temp_cpu()
+        new_temp = str(read_temp())
+        
+        if int(new_temp_cpu) > 45:
+            fun_on()
+            fun_info = "fun on"
+        else:
+            fun_off()
+            fun_info = "fun off"
+            
+        lcd_info("temp:"+new_temp+chr(176)+"C"+
+                " \nCPU:"+new_temp_cpu+chr(176)+"C "+fun_info)
         time.sleep(info_refresh)
         
 
@@ -34,7 +53,7 @@ def read_temp_cpu():
     line = f.readlines()
     f.close()
     temp_cpu = line[0][:2]
-    return str(temp_cpu)
+    return temp_cpu
 
 
 def read_temp_raw():
@@ -49,20 +68,16 @@ def read_temp():
     if re.match(r'(.*) YES(.*)', lines):
         temp = re.search(r'(.*) t=(.*)', lines).group(2)[:-4]
         temp_c = round((float(temp) / 1000), 1)
-    return str(temp_c)
+    return temp_c
 
 
-def lcd():
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(lcd_rs, GPIO.OUT)
-    GPIO.setup(lcd_e, GPIO.OUT)
-    GPIO.setup(lcd_db4, GPIO.OUT)
-    GPIO.setup(lcd_db5, GPIO.OUT)
-    GPIO.setup(lcd_db6, GPIO.OUT)
-    GPIO.setup(lcd_db7, GPIO.OUT)
-
-    lcd_reset()
-
+def fun_on():
+    GPIO.output(fun, True)
+    
+    
+def fun_off():
+    GPIO.output(fun, False)
+    
 
 def lcd_reset():
     lcd_byte(0x33)
@@ -114,6 +129,7 @@ def lcd_byte(bits, mode=False):
     
     lcd_refresh()
    
+   
 def lcd_refresh():
     time.sleep(lcd_delay)
     GPIO.output(lcd_e, True)
@@ -134,6 +150,7 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        fun_on()
         lcd_reset()
         GPIO.cleanup()
 
