@@ -5,9 +5,9 @@ The CPU Core temperature is controlled every 10 seconds by Linux command. After 
 
 
 The system consists of:
--Raspberry Pi 3
--LCD 2x16 ABC016002C
--FAN 5V
--Transistor BC 337-40
--Temperature Sensor DS18B20
--Resistor, wires, breadboard
+- Raspberry Pi 3
+- LCD 2x16 ABC016002C
+- FAN 5V
+- Transistor BC 337-40
+- Temperature Sensor DS18B20
+- Resistor, wires, breadboard
