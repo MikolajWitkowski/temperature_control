@@ -1,7 +1,7 @@
 # Temperature control in Raspberry Pi
 
 This system is designed for temperature control and avoiding overheating Raspberry Pi. 
-The CPU Core temperature is controlled every 10 seconds by Linux command. After the temperature exceeds 45 celsius degree the fan starts spinning. System dispalys information about ambient and CPU Core temperature and whether the FAN is turn on or turn off.
+The CPU Core temperature is controlled every 10 seconds by Linux command. After the temperature exceeds 45 celsius degree the fan starts spinning. System displays informations about ambient and CPU Core temperature and whether the FAN is turn on/turn off.
 
 
 The system consists of:
