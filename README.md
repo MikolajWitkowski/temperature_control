@@ -12,4 +12,5 @@ The system consists of:
 - Temperature Sensor DS18B20
 - Resistor, wires, breadboard
 
-![picture](raspberry_temp_control.jpg)
+<img src="iraspberry_temp_control.jpg" alt="raspberry_temp_control" width="225" height="300"/>
+
